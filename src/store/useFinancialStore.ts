@@ -1,54 +1,58 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { IncomeSource, Expense, Goal, Transaction, ServiceAppointment, ExpenseCategory } from '../types';
+import { IncomeSource, Expense, Goal, Transaction, ExpenseCategory } from '../types';
 import { FirebaseService } from '../services/firebaseService';
 
 interface FinancialStore {
-  // Firebase service
   firebaseService: FirebaseService | null;
   setFirebaseService: (service: FirebaseService | null) => void;
 
-  // Income Sources
+  loading: { incomeSources: boolean; expenses: boolean; goals: boolean };
+
   incomeSources: IncomeSource[];
   addIncomeSource: (source: Omit<IncomeSource, 'id'>) => void;
   updateIncomeSource: (id: string, updates: Partial<IncomeSource>) => void;
   deleteIncomeSource: (id: string) => void;
   setIncomeSources: (sources: IncomeSource[]) => void;
+  getIncomeSourceById: (id: string) => IncomeSource | undefined;
+  subscribeToIncomeSources: (callback: (data: IncomeSource[]) => void) => () => void;
 
-  // Expenses
   expenses: Expense[];
   expenseCategories: ExpenseCategory[];
   addExpense: (expense: Omit<Expense, 'id'>) => void;
   updateExpense: (id: string, updates: Partial<Expense>) => void;
   deleteExpense: (id: string) => void;
   setExpenses: (expenses: Expense[]) => void;
+  getExpenseById: (id: string) => Expense | undefined;
+  subscribeToExpenses: (callback: (data: Expense[]) => void) => () => void;
 
-  // Goals
   goals: Goal[];
   addGoal: (goal: Omit<Goal, 'id'>) => void;
   updateGoal: (id: string, updates: Partial<Goal>) => void;
   deleteGoal: (id: string) => void;
   setGoals: (goals: Goal[]) => void;
+  getGoalById: (id: string) => Goal | undefined;
+  subscribeToGoals: (callback: (data: Goal[]) => void) => () => void;
 
-  // Transactions
   transactions: Transaction[];
   addTransaction: (transaction: Omit<Transaction, 'id'>) => void;
+  setTransactions: (transactions: Transaction[]) => void;
+  getTransactionById: (id: string) => Transaction | undefined;
 
-  // Service Appointments
-  serviceAppointments: ServiceAppointment[];
-  addServiceAppointment: (appointment: Omit<ServiceAppointment, 'id'>) => void;
-  updateServiceAppointment: (id: string, updates: Partial<ServiceAppointment>) => void;
-  deleteServiceAppointment: (id: string) => void;
-  setServiceAppointments: (appointments: ServiceAppointment[]) => void;
-
-  // UI State
   darkMode: boolean;
   toggleDarkMode: () => void;
   activeView: string;
   setActiveView: (view: string) => void;
 
-  // Sync methods
   syncWithFirebase: () => Promise<void>;
+  loadUserData: (userId: string) => Promise<void>;
+  getAllUserData: (userId: string) => Promise<void>;
+
+  currentUserId: string | null;
+  setCurrentUserId: (userId: string | null) => void;
+
+  unsubscribeFunctions: (() => void)[];
+  clearSubscriptions: () => void;
 }
 
 const defaultCategories: ExpenseCategory[] = [
@@ -60,260 +64,239 @@ const defaultCategories: ExpenseCategory[] = [
   { id: '6', name: 'Alimentação', icon: 'UtensilsCrossed', color: '#8B5CF6' },
 ];
 
-const defaultIncomeSources: IncomeSource[] = [
-  {
-    id: '1',
-    name: 'Jorge',
-    amount: 1500,
-    expectedDate: '2024-01-05',
-    status: 'received',
-    color: '#3B82F6'
-  },
-  {
-    id: '2',
-    name: 'Igreja',
-    amount: 400,
-    expectedDate: '2024-01-10',
-    status: 'pending',
-    color: '#10B981'
-  },
-  {
-    id: '3',
-    name: 'Hotel',
-    amount: 100,
-    expectedDate: '2024-01-15',
-    status: 'pending',
-    color: '#F59E0B'
-  }
-];
-
-const defaultExpenses: Expense[] = [
-  {
-    id: '1',
-    title: 'Combustível',
-    amount: 120,
-    category: defaultCategories[0],
-    date: '2024-01-03',
-    description: 'Abastecimento do carro'
-  },
-  {
-    id: '2',
-    title: 'Conta de Luz',
-    amount: 180,
-    category: defaultCategories[3],
-    date: '2024-01-02',
-    recurring: true
-  },
-  {
-    id: '3',
-    title: 'Supermercado',
-    amount: 250,
-    category: defaultCategories[5],
-    date: '2024-01-01'
-  }
-];
-
-const defaultGoals: Goal[] = [
-  {
-    id: '1',
-    title: 'Viagem de Férias',
-    targetAmount: 3000,
-    currentAmount: 1200,
-    deadline: '2024-06-01',
-    category: 'Lazer',
-    priority: 'high',
-    color: '#3B82F6'
-  },
-  {
-    id: '2',
-    title: 'Reserva de Emergência',
-    targetAmount: 5000,
-    currentAmount: 2800,
-    deadline: '2024-12-31',
-    category: 'Segurança',
-    priority: 'high',
-    color: '#10B981'
-  }
-];
-
 export const useFinancialStore = create<FinancialStore>()(
   persist(
     (set, get) => ({
-      // Firebase service
       firebaseService: null,
       setFirebaseService: (service) => set({ firebaseService: service }),
 
-      // Initial state
-      incomeSources: defaultIncomeSources,
-      expenses: defaultExpenses,
+      loading: { incomeSources: false, expenses: false, goals: false },
+
+      incomeSources: [],
+      expenses: [],
       expenseCategories: defaultCategories,
-      goals: defaultGoals,
+      goals: [],
       transactions: [],
-      serviceAppointments: [],
       darkMode: false,
       activeView: 'dashboard',
+      currentUserId: null,
+      unsubscribeFunctions: [],
 
-      // Income Sources
+      setCurrentUserId: (userId) => set({ currentUserId: userId }),
+
+      clearSubscriptions: () => {
+        get().unsubscribeFunctions.forEach((unsubscribe) => unsubscribe());
+        set({ unsubscribeFunctions: [] });
+      },
+
+loadUserData: async (userId: string) => {
+  const { firebaseService } = get();
+  if (!firebaseService) return;
+
+  set({ loading: { incomeSources: true, expenses: true, goals: true } });
+
+  try {
+    const data = await firebaseService.getAllUserData();
+
+    set({
+      incomeSources: data.income || [],
+      expenses: data.expenses || [],
+      goals: data.goals || [],
+      loading: { incomeSources: false, expenses: false, goals: false }
+    });
+  } catch (error) {
+    console.error('Erro ao carregar dados do usuário:', error);
+    set({ loading: { incomeSources: false, expenses: false, goals: false } });
+  }
+},
+
+      getAllUserData: async (userId: string) => get().loadUserData(userId),
+
+      // Income sources
       addIncomeSource: async (source) => {
-        const newSource = { ...source, id: Date.now().toString() };
-        set((state) => ({
-          incomeSources: [...state.incomeSources, newSource]
-        }));
-        
-        const { firebaseService } = get();
-        if (firebaseService) {
-          try {
-            await firebaseService.saveIncomeSource(newSource);
-          } catch (error) {
-            console.error('Error saving income source to Firebase:', error);
-          }
+        const { firebaseService, currentUserId } = get();
+        if (!firebaseService || !currentUserId) return;
+
+        const newSource: IncomeSource = {
+          ...source,
+          id: Date.now().toString(),
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        };
+
+        set((state) => ({ incomeSources: [...state.incomeSources, newSource] }));
+
+        try {
+          await firebaseService.saveUserIncomeSource(currentUserId, newSource);
+        } catch {
+          set((state) => ({
+            incomeSources: state.incomeSources.filter((s) => s.id !== newSource.id),
+          }));
         }
       },
 
       updateIncomeSource: async (id, updates) => {
-        set((state) => ({
-          incomeSources: state.incomeSources.map((source) =>
-            source.id === id ? { ...source, ...updates } : source
-          )
-        }));
+        const { firebaseService, currentUserId } = get();
+        if (!firebaseService || !currentUserId) return;
 
-        const { firebaseService, incomeSources } = get();
-        if (firebaseService) {
-          const updatedSource = incomeSources.find(s => s.id === id);
-          if (updatedSource) {
-            try {
-              await firebaseService.saveIncomeSource(updatedSource);
-            } catch (error) {
-              console.error('Error updating income source in Firebase:', error);
-            }
-          }
+        const prev = get().incomeSources;
+        const updated = prev.map((s) => (s.id === id ? { ...s, ...updates, updatedAt: new Date() } : s));
+        set({ incomeSources: updated });
+
+        try {
+          const updatedSource = updated.find((s) => s.id === id);
+          if (updatedSource) await firebaseService.saveUserIncomeSource(currentUserId, updatedSource);
+        } catch {
+          set({ incomeSources: prev });
         }
       },
 
       deleteIncomeSource: async (id) => {
-        set((state) => ({
-          incomeSources: state.incomeSources.filter((source) => source.id !== id)
-        }));
+        const { firebaseService, currentUserId } = get();
+        if (!firebaseService || !currentUserId) return;
 
-        const { firebaseService } = get();
-        if (firebaseService) {
-          try {
-            await firebaseService.deleteIncomeSource(id);
-          } catch (error) {
-            console.error('Error deleting income source from Firebase:', error);
-          }
+        const prev = get().incomeSources;
+        set({ incomeSources: prev.filter((s) => s.id !== id) });
+
+        try {
+          await firebaseService.deleteUserIncomeSource(currentUserId, id);
+        } catch {
+          set({ incomeSources: prev });
         }
       },
 
       setIncomeSources: (sources) => set({ incomeSources: sources }),
+      getIncomeSourceById: (id) => get().incomeSources.find((s) => s.id === id),
+      subscribeToIncomeSources: (callback) => {
+        const { firebaseService, unsubscribeFunctions } = get();
+        if (!firebaseService) return () => {};
+        const unsub = firebaseService.subscribeToIncomeSources(callback);
+        set({ unsubscribeFunctions: [...unsubscribeFunctions, unsub] });
+        return unsub;
+      },
 
       // Expenses
       addExpense: async (expense) => {
-        const newExpense = { ...expense, id: Date.now().toString() };
-        set((state) => ({
-          expenses: [...state.expenses, newExpense]
-        }));
+        const { firebaseService, currentUserId } = get();
+        if (!firebaseService || !currentUserId) return;
 
-        const { firebaseService } = get();
-        if (firebaseService) {
-          try {
-            await firebaseService.saveExpense(newExpense);
-          } catch (error) {
-            console.error('Error saving expense to Firebase:', error);
-          }
+        const newExpense: Expense = {
+          ...expense,
+          id: Date.now().toString(),
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        };
+
+        set((state) => ({ expenses: [...state.expenses, newExpense] }));
+
+        try {
+          await firebaseService.saveUserExpense(currentUserId, newExpense);
+        } catch {
+          set((state) => ({
+            expenses: state.expenses.filter((e) => e.id !== newExpense.id),
+          }));
         }
       },
 
       updateExpense: async (id, updates) => {
-        set((state) => ({
-          expenses: state.expenses.map((expense) =>
-            expense.id === id ? { ...expense, ...updates } : expense
-          )
-        }));
+        const { firebaseService, currentUserId } = get();
+        if (!firebaseService || !currentUserId) return;
 
-        const { firebaseService, expenses } = get();
-        if (firebaseService) {
-          const updatedExpense = expenses.find(e => e.id === id);
-          if (updatedExpense) {
-            try {
-              await firebaseService.saveExpense(updatedExpense);
-            } catch (error) {
-              console.error('Error updating expense in Firebase:', error);
-            }
-          }
+        const prev = get().expenses;
+        const updated = prev.map((e) => (e.id === id ? { ...e, ...updates, updatedAt: new Date() } : e));
+        set({ expenses: updated });
+
+        try {
+          const updatedExpense = updated.find((e) => e.id === id);
+          if (updatedExpense) await firebaseService.saveUserExpense(currentUserId, updatedExpense);
+        } catch {
+          set({ expenses: prev });
         }
       },
 
       deleteExpense: async (id) => {
-        set((state) => ({
-          expenses: state.expenses.filter((expense) => expense.id !== id)
-        }));
+        const { firebaseService, currentUserId } = get();
+        if (!firebaseService || !currentUserId) return;
 
-        const { firebaseService } = get();
-        if (firebaseService) {
-          try {
-            await firebaseService.deleteExpense(id);
-          } catch (error) {
-            console.error('Error deleting expense from Firebase:', error);
-          }
+        const prev = get().expenses;
+        set({ expenses: prev.filter((e) => e.id !== id) });
+
+        try {
+          await firebaseService.deleteUserExpense(currentUserId, id);
+        } catch {
+          set({ expenses: prev });
         }
       },
 
       setExpenses: (expenses) => set({ expenses }),
+      getExpenseById: (id) => get().expenses.find((e) => e.id === id),
+      subscribeToExpenses: (callback) => {
+        const { firebaseService, unsubscribeFunctions } = get();
+        if (!firebaseService) return () => {};
+        const unsub = firebaseService.subscribeToExpenses(callback);
+        set({ unsubscribeFunctions: [...unsubscribeFunctions, unsub] });
+        return unsub;
+      },
 
       // Goals
       addGoal: async (goal) => {
-        const newGoal = { ...goal, id: Date.now().toString() };
-        set((state) => ({
-          goals: [...state.goals, newGoal]
-        }));
+        const { firebaseService, currentUserId } = get();
+        if (!firebaseService || !currentUserId) return;
 
-        const { firebaseService } = get();
-        if (firebaseService) {
-          try {
-            await firebaseService.saveGoal(newGoal);
-          } catch (error) {
-            console.error('Error saving goal to Firebase:', error);
-          }
+        const newGoal: Goal = { ...goal, id: Date.now().toString(), createdAt: new Date(), updatedAt: new Date() };
+        set((state) => ({ goals: [...state.goals, newGoal] }));
+
+        try {
+          await firebaseService.saveUserGoal(currentUserId, newGoal);
+        } catch {
+          set((state) => ({ goals: state.goals.filter((g) => g.id !== newGoal.id) }));
         }
       },
 
       updateGoal: async (id, updates) => {
-        set((state) => ({
-          goals: state.goals.map((goal) =>
-            goal.id === id ? { ...goal, ...updates } : goal
-          )
-        }));
+        const { firebaseService, currentUserId } = get();
+        if (!firebaseService || !currentUserId) return;
 
-        const { firebaseService, goals } = get();
-        if (firebaseService) {
-          const updatedGoal = goals.find(g => g.id === id);
-          if (updatedGoal) {
-            try {
-              await firebaseService.saveGoal(updatedGoal);
-            } catch (error) {
-              console.error('Error updating goal in Firebase:', error);
-            }
-          }
+        const prev = get().goals;
+        const updated = prev.map((g) => (g.id === id ? { ...g, ...updates, updatedAt: new Date() } : g));
+        set({ goals: updated });
+
+        try {
+          const updatedGoal = updated.find((g) => g.id === id);
+          if (updatedGoal) await firebaseService.saveUserGoal(currentUserId, updatedGoal);
+        } catch {
+          set({ goals: prev });
         }
       },
 
       deleteGoal: async (id) => {
-        set((state) => ({
-          goals: state.goals.filter((goal) => goal.id !== id)
-        }));
+        const { firebaseService, currentUserId } = get();
+        if (!firebaseService || !currentUserId) return;
 
-        const { firebaseService } = get();
-        if (firebaseService) {
-          try {
-            await firebaseService.deleteGoal(id);
-          } catch (error) {
-            console.error('Error deleting goal from Firebase:', error);
-          }
+        const prev = get().goals;
+        set({ goals: prev.filter((g) => g.id !== id) });
+
+        try {
+          await firebaseService.deleteUserGoal(currentUserId, id);
+        } catch {
+          set({ goals: prev });
         }
       },
-
       setGoals: (goals) => set({ goals }),
+
+      getGoalById: (id) => {
+        const { goals } = get();
+        return goals.find(goal => goal.id === id);
+      },
+
+      subscribeToGoals: (callback) => {
+        const { firebaseService, unsubscribeFunctions } = get();
+        if (!firebaseService) return () => {};
+
+        const unsubscribe = firebaseService.subscribeToGoals(callback);
+        set({ unsubscribeFunctions: [...unsubscribeFunctions, unsubscribe] });
+        return unsubscribe;
+      },
 
       // Transactions
       addTransaction: (transaction) =>
@@ -324,59 +307,12 @@ export const useFinancialStore = create<FinancialStore>()(
           ]
         })),
 
-      // Service Appointments
-      addServiceAppointment: async (appointment) => {
-        const newAppointment = { ...appointment, id: Date.now().toString() };
-        set((state) => ({
-          serviceAppointments: [...state.serviceAppointments, newAppointment]
-        }));
+      setTransactions: (transactions) => set({ transactions }),
 
-        const { firebaseService } = get();
-        if (firebaseService) {
-          try {
-            await firebaseService.saveServiceAppointment(newAppointment);
-          } catch (error) {
-            console.error('Error saving appointment to Firebase:', error);
-          }
-        }
+      getTransactionById: (id) => {
+        const { transactions } = get();
+        return transactions.find(transaction => transaction.id === id);
       },
-
-      updateServiceAppointment: async (id, updates) => {
-        set((state) => ({
-          serviceAppointments: state.serviceAppointments.map((appointment) =>
-            appointment.id === id ? { ...appointment, ...updates } : appointment
-          )
-        }));
-
-        const { firebaseService, serviceAppointments } = get();
-        if (firebaseService) {
-          const updatedAppointment = serviceAppointments.find(a => a.id === id);
-          if (updatedAppointment) {
-            try {
-              await firebaseService.saveServiceAppointment(updatedAppointment);
-            } catch (error) {
-              console.error('Error updating appointment in Firebase:', error);
-            }
-          }
-        }
-      },
-
-      deleteServiceAppointment: async (id) => {
-        set((state) => ({
-          serviceAppointments: state.serviceAppointments.filter((appointment) => appointment.id !== id)
-        }));
-
-        const { firebaseService } = get();
-        if (firebaseService) {
-          try {
-            await firebaseService.deleteServiceAppointment(id);
-          } catch (error) {
-            console.error('Error deleting appointment from Firebase:', error);
-          }
-        }
-      },
-
-      setServiceAppointments: (appointments) => set({ serviceAppointments: appointments }),
 
       // UI State
       toggleDarkMode: () =>
@@ -387,26 +323,10 @@ export const useFinancialStore = create<FinancialStore>()(
 
       // Sync methods
       syncWithFirebase: async () => {
-        const { firebaseService } = get();
-        if (!firebaseService) return;
+        const { currentUserId } = get();
+        if (!currentUserId) return;
 
-        try {
-          const [incomeSources, expenses, goals, serviceAppointments] = await Promise.all([
-            firebaseService.getIncomeSources(),
-            firebaseService.getExpenses(),
-            firebaseService.getGoals(),
-            firebaseService.getServiceAppointments()
-          ]);
-
-          set({
-            incomeSources,
-            expenses,
-            goals,
-            serviceAppointments
-          });
-        } catch (error) {
-          console.error('Error syncing with Firebase:', error);
-        }
+        await get().loadUserData(currentUserId);
       }
     }),
     {
@@ -414,7 +334,7 @@ export const useFinancialStore = create<FinancialStore>()(
       partialize: (state) => ({
         darkMode: state.darkMode,
         activeView: state.activeView,
-        // Don't persist Firebase data as it will be synced
+        currentUserId: state.currentUserId,
       }),
     }
   )

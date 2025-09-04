@@ -114,14 +114,14 @@ export const Expenses: React.FC = () => {
       <AnimatePresence>
         {showAddForm && (
           <motion.div
-            className="fixed inset-0 bg-black/50 flex items-end justify-center z-50 p-3"
+            className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-3"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setShowAddForm(false)}
           >
             <motion.div
-              className="bg-white dark:bg-gray-800 rounded-t-2xl w-full max-h-[85vh] overflow-y-auto"
+              className="bg-white dark:bg-gray-800 rounded-2xl w-full max-h-[85vh] overflow-y-auto"
               initial={{ y: '100%' }}
               animate={{ y: 0 }}
               exit={{ y: '100%' }}

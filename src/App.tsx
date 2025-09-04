@@ -1,9 +1,8 @@
-import { useEffect } from 'react';
+import { useState, useEffect } from 'react';
+import { User } from 'firebase/auth';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useAuthState } from 'react-firebase-hooks/auth';
-import { auth } from './config/firebase';
-import { FirebaseService } from './services/firebaseService';
-import { LoginScreen } from './components/auth/LoginScreen';
+import { AuthService } from './services/authService';
+import LoginScreen from './components/auth/LoginScreen';
 import { Header } from './components/layout/Header';
 import { NavigationBar } from './components/layout/NavigationBar';
 import { Dashboard } from './components/views/Dashboard';
@@ -14,6 +13,7 @@ import { Analytics } from './components/views/Analytics';
 import { Calendar } from './components/views/Calendar';
 import { Settings } from './components/views/Settings';
 import { useFinancialStore } from './store/useFinancialStore';
+import { FirebaseService } from './services/firebaseService';
 
 const views = {
   dashboard: Dashboard,
@@ -23,12 +23,59 @@ const views = {
   goals: Goals,
   calendar: Calendar,
   settings: Settings,
-};
+} as const;
+
+type ViewKeys = keyof typeof views;
 
 function App() {
-  const [user, loading] = useAuthState(auth);
-  const { activeView, darkMode, setFirebaseService, syncWithFirebase } = useFinancialStore();
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
 
+  const { activeView, darkMode, firebaseService, currentUserId } = useFinancialStore(
+    (state) => ({
+      activeView: state.activeView,
+      darkMode: state.darkMode,
+      firebaseService: state.firebaseService,
+      currentUserId: state.currentUserId,
+    })
+  );
+
+  // Configura FirebaseService e currentUserId apenas uma vez
+  useEffect(() => {
+    if (!user) return;
+
+    const store = useFinancialStore.getState();
+    if (!store.firebaseService) {
+      const service = new FirebaseService(user.uid);
+      store.setFirebaseService(service);
+      store.setCurrentUserId(user.uid);
+    }
+  }, [user]);
+
+  // Carrega dados do usuário apenas uma vez quando firebaseService e currentUserId estiverem prontos
+  useEffect(() => {
+    if (!firebaseService || !currentUserId) return;
+
+    let canceled = false;
+
+    const loadData = async () => {
+      console.log("Tentando carregar dados do usuário...");
+      try {
+        await useFinancialStore.getState().loadUserData(currentUserId);
+        if (!canceled) console.log("Dados carregados");
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    loadData();
+
+    return () => {
+      canceled = true;
+    };
+  }, [firebaseService, currentUserId]);
+
+  // Atualiza classe dark no html
   useEffect(() => {
     if (darkMode) {
       document.documentElement.classList.add('dark');
@@ -37,59 +84,48 @@ function App() {
     }
   }, [darkMode]);
 
+  // Auth listener
   useEffect(() => {
-    if (user) {
-      const firebaseService = new FirebaseService(user.uid);
-      setFirebaseService(firebaseService);
-      
-      // Sync data with Firebase
-      syncWithFirebase();
-
-      // Set up real-time listeners
-      const unsubscribeIncome = firebaseService.subscribeToIncomeSources((sources) => {
-        useFinancialStore.getState().setIncomeSources(sources);
-      });
-
-      const unsubscribeExpenses = firebaseService.subscribeToExpenses((expenses) => {
-        useFinancialStore.getState().setExpenses(expenses);
-      });
-
-      const unsubscribeGoals = firebaseService.subscribeToGoals((goals) => {
-        useFinancialStore.getState().setGoals(goals);
-      });
-
-      return () => {
-        unsubscribeIncome();
-        unsubscribeExpenses();
-        unsubscribeGoals();
-      };
-    } else {
-      setFirebaseService(null);
-    }
-  }, [user, setFirebaseService, syncWithFirebase]);
+    const unsubscribe = AuthService.onAuthStateChange((currentUser) => {
+      setUser(currentUser);
+      setLoading(false);
+    });
+    return unsubscribe;
+  }, []);
 
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
-        <motion.div
-          className="w-16 h-16 border-4 border-white/30 border-t-white rounded-full"
-          animate={{ rotate: 360 }}
-          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-        />
+        <div className="text-center space-y-4">
+          <motion.div
+            className="w-16 h-16 border-4 border-gray-300 dark:border-gray-600 border-t-blue-500 rounded-full mx-auto"
+            animate={{ rotate: 360 }}
+            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+          />
+          <p className="text-gray-600 dark:text-gray-400">
+            Carregando aplicação...
+          </p>
+        </div>
       </div>
     );
   }
 
   if (!user) {
-    return <LoginScreen />;
+    return (
+      <LoginScreen
+        onAuthSuccess={(userData: User) => {
+          setUser(userData);
+        }}
+      />
+    );
   }
 
-  const CurrentView = views[activeView as keyof typeof views] || Dashboard;
+  const CurrentView = views[activeView as ViewKeys] || Dashboard;
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
       <Header />
-      
+
       <main className="relative">
         <AnimatePresence mode="wait">
           <motion.div

@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app';
-import { getAuth, GoogleAuthProvider } from 'firebase/auth';
+import { getAuth, GoogleAuthProvider, setPersistence, browserLocalPersistence } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 
 const firebaseConfig = {
@@ -13,14 +13,19 @@ const firebaseConfig = {
   measurementId: "G-SVBSYH3E85"
 };
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
-
-// Initialize Firebase Authentication and get a reference to the service
 export const auth = getAuth(app);
-export const googleProvider = new GoogleAuthProvider();
-
-// Initialize Cloud Firestore and get a reference to the service
 export const db = getFirestore(app);
+
+setPersistence(auth, browserLocalPersistence).catch(err => {
+  console.warn('Não foi possível setar persistence:', err);
+});
+
+export const googleProvider = new GoogleAuthProvider();
+googleProvider.addScope('email');
+googleProvider.addScope('profile');
+googleProvider.setCustomParameters({
+  prompt: 'select_account'
+});
 
 export default app;

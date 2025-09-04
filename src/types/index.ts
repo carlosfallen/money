@@ -5,16 +5,35 @@ export interface IncomeSource {
   expectedDate: string;
   status: 'received' | 'pending' | 'overdue';
   color: string;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  displayName: string;
+  loginMethod: 'google' | 'email' | 'phone';
+  avatarUrl?: string;
+  incomeSources: IncomeSource[];
+  expenses: Expense[];
+  goals: Goal[];
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface Expense {
   id: string;
   title: string;
   amount: number;
-  category: ExpenseCategory;
+  category: string;
   date: string;
   description?: string;
   recurring?: boolean;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 export interface ExpenseCategory {
@@ -34,6 +53,8 @@ export interface Goal {
   category: string;
   priority: 'low' | 'medium' | 'high';
   color: string;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 export interface Transaction {
@@ -46,14 +67,15 @@ export interface Transaction {
   description?: string;
 }
 
-export interface ServiceAppointment {
+export interface Appointment {
   id: string;
   title: string;
   date: string;
-  estimatedCost: number;
-  status: 'scheduled' | 'in-progress' | 'completed';
-  category: string;
+  type: 'income' | 'expense' | 'goal' | 'reminder';
+  amount?: number;
   description?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 export interface FinancialStats {
