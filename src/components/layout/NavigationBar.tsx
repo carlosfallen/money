@@ -7,7 +7,9 @@ import {
   BarChart3, 
   Target, 
   Calendar,
-  Settings
+  Settings,
+  LogOut,
+  User
 } from 'lucide-react';
 import { useFinancialStore } from '../../store/useFinancialStore';
 
@@ -15,11 +17,15 @@ export const navItems = [
   { id: 'dashboard', icon: Home, label: 'Início' },
   { id: 'income', icon: DollarSign, label: 'Receitas' },
   { id: 'expenses', icon: CreditCard, label: 'Gastos' },
-  //{ id: 'analytics', icon: BarChart3, label: 'Relatórios' },
+  { id: 'analytics', icon: BarChart3, label: 'Relatórios' },
   { id: 'goals', icon: Target, label: 'Metas' },
-  //{ id: 'calendar', icon: Calendar, label: 'Agenda' },
+  { id: 'calendar', icon: Calendar, label: 'Agenda' },
   { id: 'settings', icon: Settings, label: 'Configurações' },
+  { id: 'profile', icon: User, label: 'Perfil' },
+  { id: 'logout', icon: LogOut, label: 'Sair' },
 ];
+
+const hiddenIds = ['settings', 'profile', 'logout', 'analytics', 'calendar'];
 
 export const NavigationBar: React.FC = () => {
   const { activeView, setActiveView } = useFinancialStore();
@@ -33,7 +39,7 @@ export const NavigationBar: React.FC = () => {
     >
 <div className="flex items-center justify-between">
   {navItems
-    .filter(item => item.id !== 'settings') // remove Configurações só aqui
+    .filter(item => !hiddenIds.includes(item.id))
     .map((item, index) => {
       const isActive = activeView === item.id
       const Icon = item.icon

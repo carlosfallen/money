@@ -28,7 +28,7 @@ export interface Expense {
   id: string;
   title: string;
   amount: number;
-  category: string;
+  category: ExpenseCategory; // agora é objeto
   date: string;
   description?: string;
   recurring?: boolean;

@@ -14,6 +14,7 @@ import { Calendar } from './components/views/Calendar';
 import { Settings } from './components/views/Settings';
 import { useFinancialStore } from './store/useFinancialStore';
 import { FirebaseService } from './services/firebaseService';
+import { Profile } from './components/views/Profile';
 
 const views = {
   dashboard: Dashboard,
@@ -23,6 +24,8 @@ const views = {
   goals: Goals,
   calendar: Calendar,
   settings: Settings,
+  profile: Profile,
+  logout: LoginScreen, // Placeholder, logout is handled differently
 } as const;
 
 type ViewKeys = keyof typeof views;

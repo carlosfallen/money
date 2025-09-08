@@ -17,7 +17,7 @@ import { useFinancialStore } from '../../store/useFinancialStore';
 
 export const Income: React.FC = () => {
   const { incomeSources, addIncomeSource, updateIncomeSource, deleteIncomeSource } = useFinancialStore();
-  const [showAddForm, setShowAddForm] = useState(false);
+  const { showAddIncomeForm, setShowAddIncomeForm } = useFinancialStore();
   const [newSource, setNewSource] = useState({
     name: '',
     amount: '',
@@ -35,7 +35,7 @@ export const Income: React.FC = () => {
         color: newSource.color
       });
       setNewSource({ name: '', amount: '', expectedDate: '', color: '#3B82F6' });
-      setShowAddForm(false);
+      setShowAddIncomeForm (false);
     }
   };
 
@@ -96,7 +96,7 @@ export const Income: React.FC = () => {
       <Button
         variant="primary"
         icon={Plus}
-        onClick={() => setShowAddForm(true)}
+        onClick={() => setShowAddIncomeForm (true)}
         fullWidth
         className="h-12"
       >
@@ -104,13 +104,13 @@ export const Income: React.FC = () => {
       </Button>
 
       <AnimatePresence>
-        {showAddForm && (
+        {showAddIncomeForm && (
           <motion.div
             className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-3"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={() => setShowAddForm(false)}
+            onClick={() => setShowAddIncomeForm (false)}
           >
             <motion.div
               className="bg-white dark:bg-gray-800 rounded-2xl w-full max-h-[85vh] overflow-y-auto"
@@ -126,7 +126,7 @@ export const Income: React.FC = () => {
                     Nova Fonte de Renda
                   </h3>
                   <button
-                    onClick={() => setShowAddForm(false)}
+                    onClick={() => setShowAddIncomeForm (false)}
                     className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
                   >
                     <X size={20} className="text-gray-500" />
@@ -198,7 +198,7 @@ export const Income: React.FC = () => {
                 <div className="flex gap-2">
                   <Button
                     variant="outline"
-                    onClick={() => setShowAddForm(false)}
+                    onClick={() => setShowAddIncomeForm (false)}
                     className="flex-1 h-10 text-sm"
                   >
                     Cancelar
@@ -333,7 +333,7 @@ export const Income: React.FC = () => {
           </p>
           <Button
             variant="primary"
-            onClick={() => setShowAddForm(true)}
+            onClick={() => setShowAddIncomeForm (true)}
           >
             Adicionar Primeira Fonte
           </Button>

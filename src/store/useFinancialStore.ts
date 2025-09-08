@@ -13,6 +13,12 @@ interface FinancialStore {
   addIncomeSource: (source: Omit<IncomeSource, 'id'>) => void;
   updateIncomeSource: (id: string, updates: Partial<IncomeSource>) => void;
   deleteIncomeSource: (id: string) => void;
+  showAddIncomeForm: boolean;
+  setShowAddIncomeForm: (show: boolean) => void;
+
+
+  showAddExpenseForm: boolean;
+  setShowAddExpenseForm: (value: boolean) => void;
   setIncomeSources: (sources: IncomeSource[]) => void;
   getIncomeSourceById: (id: string) => IncomeSource | undefined;
   subscribeToIncomeSources: (callback: (data: IncomeSource[]) => void) => () => void;
@@ -81,7 +87,10 @@ export const useFinancialStore = create<FinancialStore>()(
       activeView: 'dashboard',
       currentUserId: null,
       unsubscribeFunctions: [],
-
+      showAddExpenseForm: false,
+      showAddIncomeForm: false,
+      setShowAddExpenseForm: (value: boolean) => set({ showAddExpenseForm: value }),
+      setShowAddIncomeForm: (value: boolean) => set({ showAddIncomeForm: value }),
       setCurrentUserId: (userId) => set({ currentUserId: userId }),
 
       clearSubscriptions: () => {
@@ -89,7 +98,7 @@ export const useFinancialStore = create<FinancialStore>()(
         set({ unsubscribeFunctions: [] });
       },
 
-loadUserData: async (userId: string) => {
+loadUserData: async () => {
   const { firebaseService } = get();
   if (!firebaseService) return;
 

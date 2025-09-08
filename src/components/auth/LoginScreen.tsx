@@ -354,268 +354,225 @@ export default function LoginScreen({ onAuthSuccess }: LoginScreenProps) {
 
     return <></>;
   };
-  return (
-    <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-      <div className="absolute inset-0">
-        <div className="absolute inset-0 opacity-5">
-          <div 
-            className="absolute top-0 left-0 w-full h-full"
-            style={{
-              backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(255,255,255,0.3) 1px, transparent 0)',
-              backgroundSize: '40px 40px'
-            }}
-          />
-        </div>
-        <div className="absolute top-0 right-0 w-96 h-96 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-pulse" />
-        <div className="absolute bottom-0 left-0 w-96 h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-pulse" style={{animationDelay: '2s'}} />
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-cyan-500 rounded-full mix-blend-multiply filter blur-3xl opacity-5 animate-pulse" style={{animationDelay: '4s'}} />
+return (
+  <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+    <div className="absolute inset-0">
+      <div className="absolute inset-0 opacity-5">
+        <div
+          className="absolute top-0 left-0 w-full h-full"
+          style={{
+            backgroundImage:
+              "radial-gradient(circle at 1px 1px, rgba(255,255,255,0.3) 1px, transparent 0)",
+            backgroundSize: "40px 40px",
+          }}
+        />
       </div>
+      <div className="absolute top-0 right-0 w-96 h-96 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-pulse" />
+      <div
+        className="absolute bottom-0 left-0 w-96 h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-pulse"
+        style={{ animationDelay: "2s" }}
+      />
+      <div
+        className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-cyan-500 rounded-full mix-blend-multiply filter blur-3xl opacity-5 animate-pulse"
+        style={{ animationDelay: "4s" }}
+      />
+    </div>
 
-      <div className="relative z-10 min-h-screen">
-        <div className="container mx-auto px-4 lg:px-8 py-6 lg:py-12">
-          <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-center min-h-screen lg:min-h-0">
-            
-            <div className="space-y-6 lg:space-y-8 order-2 lg:order-1">
-              <div className="text-center lg:text-left space-y-4 lg:space-y-6">
-                <div className="flex items-center justify-center lg:justify-start gap-4">
-                  <div className="relative">
-                    <div className="w-12 h-12 lg:w-16 lg:h-16 bg-gradient-to-br from-slate-700 to-slate-800 rounded-2xl flex items-center justify-center shadow-xl border border-slate-600">
-                      <Calculator className="w-6 h-6 lg:w-8 lg:h-8 text-white" />
+    <div className="relative z-10 min-h-screen">
+      <div className="container mx-auto px-4 lg:px-8 py-6 lg:py-12">
+        {/* TOPO: grid 2 colunas */}
+        <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-start">
+          {/* Coluna Esquerda: título, subtítulo, stats */}
+          <div className="space-y-6 lg:space-y-8">
+            <div className="text-center lg:text-left space-y-4 lg:space-y-6">
+              <div className="flex items-center justify-center lg:justify-start gap-4">
+                <div className="relative">
+                  <div className="w-12 h-12 lg:w-16 lg:h-16 bg-gradient-to-br from-slate-700 to-slate-800 rounded-2xl flex items-center justify-center shadow-xl border border-slate-600">
+                    <Calculator className="w-6 h-6 lg:w-8 lg:h-8 text-white" />
+                  </div>
+                  <div className="absolute -top-1 -right-1 w-4 h-4 bg-gradient-to-r from-amber-400 to-orange-500 rounded-full animate-pulse" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-3">
+                    <h1 className="text-2xl lg:text-3xl font-bold text-white">CLT Finance</h1>
+                    <div className="px-3 py-1 bg-gradient-to-r from-amber-500/20 to-orange-500/20 rounded-full border border-amber-500/30 backdrop-blur-sm">
+                      <span className="text-amber-300 text-xs lg:text-sm font-medium flex items-center gap-1">
+                        <Star className="w-3 h-3" />
+                        Beta
+                      </span>
                     </div>
-                    <div className="absolute -top-1 -right-1 w-4 h-4 bg-gradient-to-r from-amber-400 to-orange-500 rounded-full animate-pulse" />
+                  </div>
+                  <p className="text-slate-400 text-xs lg:text-sm mt-1">Versão Beta • Acesso Gratuito</p>
+                </div>
+              </div>
+
+              <div className="space-y-3 lg:space-y-4">
+                <h2 className="text-3xl lg:text-5xl font-bold text-white leading-tight">
+                  O Assistente Financeiro
+                  <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-400 to-cyan-400 text-2xl lg:text-4xl font-bold mt-1 lg:mt-2">
+                    Definitivo para CLT
+                  </span>
+                </h2>
+                <p className="text-lg lg:text-xl text-slate-300 leading-relaxed max-w-2xl">
+                  Controle total do seu salário, 13º, benefícios e despesas. Planeje seu futuro financeiro com inteligência.
+                </p>
+              </div>
+
+              <div className="bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/20 rounded-2xl p-4 lg:p-6 backdrop-blur-sm">
+                <div className="flex items-start gap-3">
+                  <div className="p-2 bg-gradient-to-r from-amber-500/20 to-orange-500/20 rounded-xl">
+                    <Award className="w-5 h-5 text-amber-400" />
                   </div>
                   <div>
-                    <div className="flex items-center gap-3">
-                      <h1 className="text-2xl lg:text-3xl font-bold text-white">CLT Finance</h1>
-                      <div className="px-3 py-1 bg-gradient-to-r from-amber-500/20 to-orange-500/20 rounded-full border border-amber-500/30 backdrop-blur-sm">
-                        <span className="text-amber-300 text-xs lg:text-sm font-medium flex items-center gap-1">
-                          <Star className="w-3 h-3" />
-                          Beta
-                        </span>
-                      </div>
-                    </div>
-                    <p className="text-slate-400 text-xs lg:text-sm mt-1">Versão Beta • Acesso Gratuito</p>
-                  </div>
-                </div>
-
-                <div className="space-y-3 lg:space-y-4">
-                  <h2 className="text-3xl lg:text-5xl font-bold text-white leading-tight">
-                    O Assistente Financeiro
-                    <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-400 to-cyan-400 text-2xl lg:text-4xl font-bold mt-1 lg:mt-2">
-                      Definitivo para CLT
-                    </span>
-                  </h2>
-                  <p className="text-lg lg:text-xl text-slate-300 leading-relaxed max-w-2xl">
-                    Controle total do seu salário, 13º, benefícios e despesas. Planeje seu futuro financeiro com inteligência.
-                  </p>
-                </div>
-
-                <div className="bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/20 rounded-2xl p-4 lg:p-6 backdrop-blur-sm">
-                  <div className="flex items-start gap-3">
-                    <div className="p-2 bg-gradient-to-r from-amber-500/20 to-orange-500/20 rounded-xl">
-                      <Award className="w-5 h-5 text-amber-400" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-amber-300 mb-1">Fase Beta Exclusiva!</h3>
-                      <p className="text-slate-300 text-sm leading-relaxed">
-                        Seja um dos primeiros a testar e moldar o futuro da gestão financeira para trabalhadores CLT.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-3 gap-4 lg:gap-6">
-                  {stats.map((stat, index) => {
-                    const Icon = stat.icon;
-                    return (
-                      <div key={index} className="text-center p-3 lg:p-4 bg-slate-800/30 backdrop-blur-sm rounded-xl border border-slate-700/50 hover:bg-slate-800/50 transition-all duration-300">
-                        <Icon className="w-5 h-5 lg:w-6 lg:h-6 text-slate-400 mx-auto mb-2" />
-                        <div className="text-xl lg:text-2xl font-bold text-white">{stat.number}</div>
-                        <div className="text-xs lg:text-sm text-slate-400">{stat.label}</div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-
-              <div className="hidden lg:block space-y-4">
-                <h3 className="text-xl font-semibold text-white mb-4 flex items-center gap-2">
-                  <Zap className="w-5 h-5 text-blue-400" />
-                  Funcionalidades Principais
-                </h3>
-                
-                <div className="space-y-3">
-                  {features.map((feature, index) => {
-                    const Icon = feature.icon;
-                    const isActive = index === activeFeature;
-                    
-                    return (
-                      <div
-                        key={index}
-                        className={`group relative overflow-hidden rounded-2xl p-4 lg:p-5 transition-all duration-500 cursor-pointer border ${
-                          isActive 
-                            ? 'bg-slate-800/80 backdrop-blur-sm border-slate-600 scale-[1.02] shadow-xl' 
-                            : 'bg-slate-800/40 backdrop-blur-sm hover:bg-slate-800/60 border-slate-700/50 hover:border-slate-600/50'
-                        }`}
-                        onClick={() => setActiveFeature(index)}
-                      >
-                        <div className="relative flex items-center gap-4">
-                          <div className={`relative p-3 rounded-xl transition-all duration-300 ${
-                            isActive 
-                              ? `bg-gradient-to-r ${feature.color} shadow-lg` 
-                              : 'bg-slate-700 group-hover:bg-slate-600'
-                          }`}>
-                            <Icon className="w-5 h-5 text-white" />
-                            {isActive && (
-                              <div className={`absolute inset-0 rounded-xl bg-gradient-to-r ${feature.color} opacity-20 animate-pulse`} />
-                            )}
-                          </div>
-                          
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-1">
-                              <h4 className="font-semibold text-white">{feature.title}</h4>
-                              {isActive && (
-                                <span className={`px-2 py-1 rounded-full text-xs font-medium bg-gradient-to-r ${feature.color} text-white shadow-sm`}>
-                                  {feature.highlight}
-                                </span>
-                              )}
-                            </div>
-                            <p className="text-slate-400 text-sm leading-relaxed">
-                              {feature.description}
-                            </p>
-                          </div>
-                          
-                          {isActive && (
-                            <div className="flex-shrink-0">
-                              <CheckCircle2 className="w-5 h-5 text-green-400" />
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-
-              <div className="lg:hidden">
-                <div className="bg-slate-800/60 backdrop-blur-sm rounded-2xl p-4 border border-slate-700/50">
-                  <div className="flex justify-center gap-2 mb-4">
-                    {features.map((_, index) => (
-                      <div
-                        key={index}
-                        className={`h-1 rounded-full transition-all duration-300 ${
-                          index === activeFeature ? 'w-8 bg-gradient-to-r from-blue-400 to-cyan-400' : 'w-2 bg-slate-600'
-                        }`}
-                      />
-                    ))}
-                  </div>
-                  
-                  {(() => {
-                    const feature = features[activeFeature];
-                    const Icon = feature.icon;
-                    return (
-                      <div className="text-center space-y-3">
-                        <div className={`inline-flex p-4 rounded-2xl bg-gradient-to-r ${feature.color} shadow-lg`}>
-                          <Icon className="w-8 h-8 text-white" />
-                        </div>
-                        <div>
-                          <div className="flex items-center justify-center gap-2 mb-2">
-                            <h4 className="font-semibold text-white">{feature.title}</h4>
-                            <span className={`px-2 py-1 rounded-full text-xs font-medium bg-gradient-to-r ${feature.color} text-white`}>
-                              {feature.highlight}
-                            </span>
-                          </div>
-                          <p className="text-slate-400 text-sm leading-relaxed">
-                            {feature.description}
-                          </p>
-                        </div>
-                      </div>
-                    );
-                  })()}
-                </div>
-              </div>
-
-              <div className="lg:hidden">
-                <div className="grid grid-cols-3 gap-3">
-                  {testimonials.map((testimonial, index) => (
-                    <div key={index} className="bg-slate-800/40 backdrop-blur-sm rounded-xl p-3 border border-slate-700/50 text-center">
-                      <div className="flex justify-center mb-2">
-                        {[...Array(5)].map((_, i) => (
-                          <Star key={i} className="w-3 h-3 text-amber-400 fill-current" />
-                        ))}
-                      </div>
-                      <p className="text-slate-300 text-xs italic mb-1">"{testimonial.text}"</p>
-                      <p className="text-slate-500 text-xs">— {testimonial.author}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="hidden lg:block">
-                <div className="space-y-4">
-                  <h4 className="text-lg font-semibold text-white flex items-center gap-2">
-                    <Users className="w-5 h-5 text-green-400" />
-                    O que dizem os beta testers
-                  </h4>
-                  <div className="grid gap-3">
-                    {testimonials.map((testimonial, index) => (
-                      <div key={index} className="bg-slate-800/40 backdrop-blur-sm rounded-xl p-4 border border-slate-700/50 hover:bg-slate-800/60 transition-all duration-300">
-                        <div className="flex items-center gap-2 mb-2">
-                          {[...Array(5)].map((_, i) => (
-                            <Star key={i} className="w-4 h-4 text-amber-400 fill-current" />
-                          ))}
-                        </div>
-                        <p className="text-slate-300 text-sm italic mb-2">"{testimonial.text}"</p>
-                        <p className="text-slate-500 text-xs">— {testimonial.author}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex justify-center order-1 lg:order-2">
-              <div className="w-full max-w-md">
-                <div className="bg-white/95 backdrop-blur-xl rounded-3xl p-6 lg:p-8 border border-white/20 shadow-2xl">
-                  {renderLoginContent()}
-
-                  <div className="mt-6 text-center space-y-3">
-                    <div className="flex items-center justify-center gap-2 text-xs text-slate-500">
-                      <Lock className="w-4 h-4" />
-                      <span>Dados 100% privados e criptografados</span>
-                    </div>
-                    {loginMethod === 'options' && (
-                      <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-full">
-                        <Star className="w-4 h-4 text-amber-600" />
-                        <span className="text-amber-800 text-sm font-medium">Acesso Beta Gratuito</span>
-                      </div>
-                    )}
-                    <p className="text-xs text-slate-500 leading-relaxed">
-                      {loginMethod === 'options' 
-                        ? "Como beta tester, o seu feedback é fundamental para construirmos a melhor experiência possível"
-                        : "Seus dados são protegidos com criptografia de ponta a ponta"
-                      }
+                    <h3 className="font-semibold text-amber-300 mb-1">Fase Beta Exclusiva!</h3>
+                    <p className="text-slate-300 text-sm leading-relaxed">
+                      Seja um dos primeiros a testar e moldar o futuro da gestão financeira para trabalhadores CLT.
                     </p>
                   </div>
                 </div>
               </div>
+
+              <div className="grid grid-cols-3 gap-4 lg:gap-6">
+                {stats.map((stat, index) => {
+                  const Icon = stat.icon;
+                  return (
+                    <div
+                      key={index}
+                      className="text-center p-3 lg:p-4 bg-slate-800/30 backdrop-blur-sm rounded-xl border border-slate-700/50 hover:bg-slate-800/50 transition-all duration-300"
+                    >
+                      <Icon className="w-5 h-5 lg:w-6 lg:h-6 text-slate-400 mx-auto mb-2" />
+                      <div className="text-xl lg:text-2xl font-bold text-white">{stat.number}</div>
+                      <div className="text-xs lg:text-sm text-slate-400">{stat.label}</div>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           </div>
 
-          <div className="mt-12 pt-8 border-t border-slate-700/50">
-            <p className="text-center text-slate-500 text-xs leading-relaxed">
-              Ao continuar, você concorda com nossos{' '}
-              <button className="text-slate-400 hover:text-slate-300 underline transition-colors">
-                Termos de Uso
-              </button>{' '}
-              e{' '}
-              <button className="text-slate-400 hover:text-slate-300 underline transition-colors">
-                Política de Privacidade
-              </button>
-            </p>
+          {/* Coluna Direita: login */}
+          <div className="flex justify-center">
+            <div className="w-full max-w-md">
+              <div className="bg-white/95 backdrop-blur-xl rounded-3xl p-6 lg:p-8 border border-white/20 shadow-2xl">
+                {renderLoginContent()}
+
+                <div className="mt-6 text-center space-y-3">
+                  <div className="flex items-center justify-center gap-2 text-xs text-slate-500">
+                    <Lock className="w-4 h-4" />
+                    <span>Dados 100% privados e criptografados</span>
+                  </div>
+                  {loginMethod === "options" && (
+                    <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-full">
+                      <Star className="w-4 h-4 text-amber-600" />
+                      <span className="text-amber-800 text-sm font-medium">Acesso Beta Gratuito</span>
+                    </div>
+                  )}
+                  <p className="text-xs text-slate-500 leading-relaxed">
+                    {loginMethod === "options"
+                      ? "Como beta tester, o seu feedback é fundamental para construirmos a melhor experiência possível"
+                      : "Seus dados são protegidos com criptografia de ponta a ponta"}
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
+        </div>
+
+        {/* ABAIXO: features + testimonials */}
+        <div className="mt-16 space-y-16">
+          {/* features */}
+          <div>
+            <h3 className="text-xl font-semibold text-white mb-6 flex items-center gap-2">
+              <Zap className="w-5 h-5 text-blue-400" />
+              Funcionalidades Principais
+            </h3>
+            <div className="grid lg:grid-cols-2 gap-6">
+              {features.map((feature, index) => {
+                const Icon = feature.icon;
+                const isActive = index === activeFeature;
+                return (
+                  <div
+                    key={index}
+                    className={`group relative overflow-hidden rounded-2xl p-5 transition-all duration-500 cursor-pointer border ${
+                      isActive
+                        ? "bg-slate-800/80 backdrop-blur-sm border-slate-600 scale-[1.02] shadow-xl"
+                        : "bg-slate-800/40 backdrop-blur-sm hover:bg-slate-800/60 border-slate-700/50 hover:border-slate-600/50"
+                    }`}
+                    onClick={() => setActiveFeature(index)}
+                  >
+                    <div className="relative flex items-center gap-4">
+                      <div
+                        className={`relative p-3 rounded-xl transition-all duration-300 ${
+                          isActive ? `bg-gradient-to-r ${feature.color} shadow-lg` : "bg-slate-700 group-hover:bg-slate-600"
+                        }`}
+                      >
+                        <Icon className="w-5 h-5 text-white" />
+                        {isActive && (
+                          <div className={`absolute inset-0 rounded-xl bg-gradient-to-r ${feature.color} opacity-20 animate-pulse`} />
+                        )}
+                      </div>
+
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <h4 className="font-semibold text-white">{feature.title}</h4>
+                          {isActive && (
+                            <span
+                              className={`px-2 py-1 rounded-full text-xs font-medium bg-gradient-to-r ${feature.color} text-white shadow-sm`}
+                            >
+                              {feature.highlight}
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-slate-400 text-sm leading-relaxed">{feature.description}</p>
+                      </div>
+
+                      {isActive && (
+                        <div className="flex-shrink-0">
+                          <CheckCircle2 className="w-5 h-5 text-green-400" />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* testimonials */}
+          <div>
+            <h4 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+              <Users className="w-5 h-5 text-green-400" />
+              O que dizem os beta testers
+            </h4>
+            <div className="grid lg:grid-cols-2 gap-4">
+              {testimonials.map((testimonial, index) => (
+                <div
+                  key={index}
+                  className="bg-slate-800/40 backdrop-blur-sm rounded-xl p-4 border border-slate-700/50 hover:bg-slate-800/60 transition-all duration-300"
+                >
+                  <div className="flex items-center gap-2 mb-2">
+                    {[...Array(5)].map((_, i) => (
+                      <Star key={i} className="w-4 h-4 text-amber-400 fill-current" />
+                    ))}
+                  </div>
+                  <p className="text-slate-300 text-sm italic mb-2">"{testimonial.text}"</p>
+                  <p className="text-slate-500 text-xs">— {testimonial.author}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Rodapé */}
+        <div className="mt-12 pt-8 border-t border-slate-700/50">
+          <p className="text-center text-slate-500 text-xs leading-relaxed">
+            Ao continuar, você concorda com nossos{" "}
+            <button className="text-slate-400 hover:text-slate-300 underline transition-colors">Termos de Uso</button> e{" "}
+            <button className="text-slate-400 hover:text-slate-300 underline transition-colors">Política de Privacidade</button>
+          </p>
         </div>
       </div>
     </div>
-  );
+  </div>
+);
 }

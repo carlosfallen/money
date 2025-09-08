@@ -8,7 +8,20 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'masked-icon.svg'],
+      includeAssets: [
+        'favicon.ico',
+        'robots.txt',
+        'apple-touch-icon-180x180.png',
+        'maskable-icon-512x512.png',
+        'pwa-192x192.png',
+        'pwa-512x512.png',
+        // se quiser também os splash screens
+        'apple-splash-640-1136.jpg',
+        'apple-splash-750-1334.jpg',
+        'apple-splash-828-1792.jpg',
+        'apple-splash-1125-2436.jpg',
+        // etc...
+      ],
       manifest: {
         name: 'FinanceApp - Controle Financeiro',
         short_name: 'FinanceApp',
@@ -25,29 +38,29 @@ export default defineConfig({
         dir: 'ltr',
         icons: [
           {
-            src: 'pwa-64x64.png',
+            src: '/pwa-64x64.png',
             sizes: '64x64',
             type: 'image/png'
           },
           {
-            src: 'pwa-192x192.png',
+            src: '/pwa-192x192.png',
             sizes: '192x192',
             type: 'image/png'
           },
           {
-            src: 'pwa-512x512.png',
+            src: '/pwa-512x512.png',
             sizes: '512x512',
             type: 'image/png',
             purpose: 'any'
           },
           {
-            src: 'maskable-icon-512x512.png',
+            src: '/maskable-icon-512x512.png',
             sizes: '512x512',
             type: 'image/png',
             purpose: 'maskable'
           },
           {
-            src: 'apple-touch-icon-180x180.png',
+            src: '/apple-touch-icon-180x180.png',
             sizes: '180x180',
             type: 'image/png',
             purpose: 'any'
@@ -55,13 +68,13 @@ export default defineConfig({
         ],
         screenshots: [
           {
-            src: 'screenshot-wide.png',
+            src: '/screenshot-wide.png',
             sizes: '1280x720',
             type: 'image/png',
             label: 'Dashboard principal do FinanceApp'
           },
           {
-            src: 'screenshot-narrow.png',
+            src: '/screenshot-narrow.png',
             sizes: '750x1334',
             type: 'image/png',
             form_factor: 'narrow',
@@ -76,7 +89,7 @@ export default defineConfig({
             url: '/income/new',
             icons: [
               {
-                src: 'shortcut-income.png',
+                src: '/shortcut-income.png',
                 sizes: '96x96',
                 type: 'image/png'
               }
@@ -89,7 +102,7 @@ export default defineConfig({
             url: '/expenses/new',
             icons: [
               {
-                src: 'shortcut-expense.png',
+                src: '/shortcut-expense.png',
                 sizes: '96x96',
                 type: 'image/png'
               }
@@ -102,7 +115,7 @@ export default defineConfig({
             url: '/reports',
             icons: [
               {
-                src: 'shortcut-reports.png',
+                src: '/shortcut-reports.png',
                 sizes: '96x96',
                 type: 'image/png'
               }
@@ -130,7 +143,7 @@ export default defineConfig({
       }
     }
   },
-    resolve: {
+  resolve: {
     alias: {
       "@": path.resolve(__dirname, "src"),
     },

@@ -11,13 +11,14 @@ import {
 import { MetricCard } from '../ui/MetricCard';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
+import { subMonths, format } from 'date-fns';
 import { useFinancialStore } from '../../store/useFinancialStore';
 import { PieChart as RechartsPieChart, Pie, Cell, ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip } from 'recharts';
 
 export const Dashboard: React.FC = () => {
   const { 
     incomeSources, 
-    expenses, 
+    expenses,  
     goals, 
     expenseCategories,
     setActiveView 
@@ -28,12 +29,11 @@ export const Dashboard: React.FC = () => {
   const balance = totalIncome - totalExpenses;
   const monthlyTrend = 12;
 
-  // Tratamento seguro para categorias de gastos
-  const expenseByCategory = expenses?.reduce((acc, expense) => {
-    const categoryName = expense.category || 'Outros';
-    acc[categoryName] = (acc[categoryName] || 0) + (expense.amount || 0);
-    return acc;
-  }, {} as Record<string, number>) || {};
+const expenseByCategory = expenses?.reduce((acc, expense) => {
+  const categoryName = expense.category?.name || 'Outros';
+  acc[categoryName] = (acc[categoryName] || 0) + (expense.amount || 0);
+  return acc;
+}, {} as Record<string, number>) || {};
 
   const pieData = Object.entries(expenseByCategory).map(([name, value]) => {
     const category = expenseCategories?.find(cat => cat.name === name);
@@ -44,28 +44,59 @@ export const Dashboard: React.FC = () => {
     };
   }).filter(item => item.value > 0);
 
-  const trendData = [
-    { month: 'Nov', income: totalIncome * 0.9, expenses: totalExpenses * 0.8 },
-    { month: 'Dez', income: totalIncome * 0.95, expenses: totalExpenses * 0.9 },
-    { month: 'Jan', income: totalIncome, expenses: totalExpenses },
-  ];
+const now = new Date();
 
+// Gera os últimos 3 meses (incluindo o atual)
+const months = Array.from({ length: 3 }).map((_, i) => {
+  const date = subMonths(now, 2 - i);
+  return {
+    label: format(date, 'MMM'), // ex: 'Set', 'Out', 'Nov'
+    month: date.getMonth(),
+    year: date.getFullYear(),
+  };
+});
+
+// Calcula trendData real
+const trendData = months.map(({ label, month, year }) => {
+  // Soma receitas do mês
+  const income = incomeSources
+    ?.filter(src => src.expectedDate)
+    .filter(src => {
+      const d = new Date(src.expectedDate!);
+      return d.getMonth() === month && d.getFullYear() === year;
+    })
+    .reduce((sum, src) => sum + (src.amount || 0), 0) || 0;
+
+  // Soma despesas do mês
+  const expensesTotal = expenses
+    ?.filter(exp => exp.date)
+    .filter(exp => {
+      const d = new Date(exp.date!);
+      return d.getMonth() === month && d.getFullYear() === year;
+    })
+    .reduce((sum, exp) => sum + (exp.amount || 0), 0) || 0;
+
+  return {
+    month: label,
+    income,
+    expenses: expensesTotal,
+  };
+});
   // Usar apenas expenses como transações recentes
   const recentTransactions = expenses
     ?.slice(0, 4)
     .sort((a, b) => new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime()) || [];
 
   const handleNewIncome = () => {
-    setActiveView?.('add-income');
+    setActiveView?.('income');
+    useFinancialStore.getState().setShowAddIncomeForm(true);
   };
 
-  const handleNewExpense = () => {
-    setActiveView?.('add-expense');
-  };
+const handleNewExpense = () => {
+  setActiveView?.('expenses');
+  useFinancialStore.getState().setShowAddExpenseForm(true);
+};
 
-  const handleViewAllTransactions = () => {
-    setActiveView?.('transactions');
-  };
 
   const handleViewAllGoals = () => {
     setActiveView?.('goals');
@@ -148,13 +179,17 @@ export const Dashboard: React.FC = () => {
                   outerRadius={70}
                   paddingAngle={3}
                   dataKey="value"
+                  nameKey="name"
                 >
                   {pieData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
                 </Pie>
-                <Tooltip 
-                  formatter={(value: number) => [`R$ ${value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`, 'Valor']} 
+                <Tooltip
+                  formatter={(value: number, name: string) => [
+                    `R$ ${value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
+                    name, // aqui aparece o nome da categoria
+                  ]}
                 />
               </RechartsPieChart>
             </ResponsiveContainer>
@@ -199,6 +234,7 @@ export const Dashboard: React.FC = () => {
                   stroke="#10B981" 
                   strokeWidth={2}
                   dot={{ fill: '#10B981', strokeWidth: 0, r: 3 }}
+                  name="Ganhos" 
                 />
                 <Line 
                   type="monotone" 
@@ -206,6 +242,7 @@ export const Dashboard: React.FC = () => {
                   stroke="#EF4444" 
                   strokeWidth={2}
                   dot={{ fill: '#EF4444', strokeWidth: 0, r: 3 }}
+                  name="Gastos" 
                 />
               </LineChart>
             </ResponsiveContainer>
@@ -230,7 +267,7 @@ export const Dashboard: React.FC = () => {
               Gastos Recentes
             </h3>
             <button 
-              onClick={handleViewAllTransactions}
+              onClick={handleNewExpense}
               className="flex items-center gap-1 text-blue-500 hover:text-blue-600 transition-colors"
             >
               <span className="text-xs">Ver todas</span>
